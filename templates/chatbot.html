@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8 h-[calc(100vh-100px)] flex flex-col pt-12">
+    <!-- Header -->
+    <div
+        class="bg-white/95 backdrop-blur-xl rounded-t-3xl border border-slate-200 p-6 flex items-center justify-between shadow-sm z-10 relative">
+        <div class="flex items-center gap-5">
+            <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-robot text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight">DermAI Assistant</h2>
+                <div class="flex items-center gap-2 text-sm font-bold text-emerald-600 mt-1">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    Local Gemma3 Model Active
+                </div>
+            </div>
+        </div>
+        <div>
+            <button
+                class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                onclick="clearChatUI()">
+                <i class="fa-solid fa-broom"></i> <span class="hidden sm:inline">Clear Chat</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="flex-grow bg-slate-50/50 backdrop-blur-sm overflow-y-auto p-6 md:p-8 space-y-8 border-x border-slate-200 relative"
+        id="chat-box">
+        <!-- Background Pattern -->
+        <div
+            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4wNCkiLz48L3N2Zz4=')] opacity-50 z-0 pointer-events-none">
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="flex items-start gap-4 fade-in relative z-10">
+            <div
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white shadow-md mt-1">
+                <i class="fa-solid fa-robot text-sm"></i>
+            </div>
+            <div
+                class="bg-white px-6 py-5 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 max-w-[85%] text-slate-700 leading-relaxed font-medium">
+                Hello <strong>{{ session.get('user_name') }}</strong>! I am your personal dermatology AI assistant
+                powered by Gemma3.<br><br>
+                You can ask me questions about skin diseases, symptoms, prevention tips, treatments, and more. How can I
+                help you today?
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Input Area -->
+    <div
+        class="bg-white p-5 md:p-6 rounded-b-3xl border border-slate-200 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)] z-10 relative">
+        <form id="chat-form" class="relative flex items-center max-w-4xl mx-auto" onsubmit="sendMessage(event)">
+            <input type="text" id="chat-input"
+                class="w-full bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl py-5 pl-6 pr-20 transition-all text-slate-800 font-medium placeholder-slate-400 text-lg shadow-inner"
+                placeholder="Type your health-related question..." autocomplete="off">
+            <button type="submit" id="send-btn"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-gradient-to-r from-medical-blue to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+        <p class="text-center text-xs text-slate-400 font-medium mt-3">DermAI Assistants can make mistakes. Always
+            consult a real doctor for medical emergencies.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function appendMessage(role, content) {
+        const isUser = role === 'user';
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex items-start gap-4 fade-in relative z-10 ${isUser ? 'flex-row-reverse' : ''}`;
+
+        const avatarDiv = isUser
+            ? `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-medical-blue flex-shrink-0 flex items-center justify-center text-white shadow-md mt-1 font-bold text-sm">{{ session.get('user_name')[0].upper() }}</div>`
+            : `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white shadow-md mt-1"><i class="fa-solid fa-robot text-sm"></i></div>`;
+
+        // Very basic markdown bold conversion for Ollama output
+        const formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+        const bubbleClass = isUser
+            ? `bg-medical-blue text-white rounded-2xl rounded-tr-sm shadow-md max-w-[85%] leading-relaxed font-medium px-6 py-5`
+            : `bg-white text-slate-700 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 max-w-[85%] leading-relaxed font-medium px-6 py-5`;
+
+        msgDiv.innerHTML = `
+            ${avatarDiv}
+            <div class="${bubbleClass}">
+                ${formattedContent}
+            </div>
+        `;
+
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = "flex items-start gap-4 typing-indicator fade-in relative z-10";
+        msgDiv.id = "typing-dots";
+        msgDiv.innerHTML = `
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white shadow-md mt-1">
+                <i class="fa-solid fa-robot text-sm"></i>
+            </div>
+            <div class="bg-white px-5 py-4 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 flex gap-1.5 items-center h-[52px]">
+                <div class="w-2.5 h-2.5 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                <div class="w-2.5 h-2.5 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                <div class="w-2.5 h-2.5 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+            </div>
+        `;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const typing = document.getElementById('typing-dots');
+        if (typing) typing.remove();
+    }
+
+    async function sendMessage(e) {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Append user msg
+        appendMessage('user', text);
+        chatInput.value = '';
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+
+        showTypingIndicator();
+
+        try {
+            const response = await fetch("{{ url_for('chat_api') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+
+            removeTypingIndicator();
+
+            if (response.ok) {
+                // Determine the last message bubble (AI bubble)
+                appendMessage('ai', '');
+                const lastMsgDiv = chatBox.lastElementChild;
+                const bubbleTextDiv = lastMsgDiv.children[1];
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let aiResponseContent = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunkStr = decoder.decode(value, { stream: true });
+                    const lines = chunkStr.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.substring(6).trim();
+                            if (dataStr === '[DONE]') break;
+                            if (dataStr) {
+                                try {
+                                    const parsed = JSON.parse(dataStr);
+                                    if (parsed.chunk) {
+                                        aiResponseContent += parsed.chunk;
+                                        // Basic markdown bold to HTML
+                                        bubbleTextDiv.innerHTML = aiResponseContent
+                                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                            .replace(/\n/g, '<br>');
+                                        chatBox.scrollTop = chatBox.scrollHeight;
+                                    }
+                                } catch(e) { 
+                                    console.error("Error parsing stream chunk", e); 
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                appendMessage('ai', "Sorry, I ran into an error processing your request.");
+            }
+        } catch (error) {
+            removeTypingIndicator();
+            appendMessage('ai', "Connection error. Is the server running?");
+        } finally {
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            // focus with a slight delay
+            setTimeout(() => chatInput.focus(), 100);
+        }
+    }
+
+    function clearChatUI() {
+        // preserve the background element and first message
+        const bg = chatBox.children[0].outerHTML;
+        const firstMsg = chatBox.children[1].outerHTML;
+        chatBox.innerHTML = bg + firstMsg;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+/* Custom CSS & Animations for DermAI Final Year Project */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.glass-nav {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-dark {
+    background: rgba(11, 28, 61, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button & Hover effects */
+.h-effect {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.h-effect:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(10, 88, 202, 0.15), 0 10px 10px -5px rgba(10, 88, 202, 0.04);
+}
+
+/* Custom Premium Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+    border: 2px solid #f8fafc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
+/* Chat scrollbar thinner */
+#chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chat-box::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.5);
+    border: none;
+}
+
+/* Typing indicator dot animation */
+.typing-indicator .bg-slate-400 {
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator .bg-slate-400:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-indicator .bg-slate-400:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Dropzone styling over tailwind */
+#drop-zone {
+    transition: all 0.3s ease;
+}
+
+#drop-zone.border-medical-blue {
+    background-color: rgba(10, 88, 202, 0.03);
+    border-color: #0A58CA;
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px rgba(10, 88, 202, 0.1);
+}
+
+#drop-zone.border-medical-blue .drop-zone-icon {
+    color: #0A58CA;
+    transform: scale(1.1) translateY(-5px);
+}
+
+.drop-zone-icon {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Smooth fade in */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Animation Delays */
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}

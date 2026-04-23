@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermAI - AI Powered Skin Cancer Detection</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        'medical-blue': '#0A58CA',
+                        'medical-light': '#F4F7FF',
+                        'medical-dark': '#0B1C3D',
+                        'medical-accent': '#00C2A8'
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body
+    class="bg-slate-50 text-slate-800 antialiased flex flex-col min-h-screen selection:bg-medical-blue selection:text-white">
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-50 border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
+                        <div
+                            class="bg-gradient-to-br from-medical-blue to-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-all duration-300">
+                            <i class="fa-solid fa-notes-medical text-2xl"></i>
+                        </div>
+                        <span class="font-extrabold text-2xl text-medical-dark tracking-tight">Derm<span
+                                class="text-medical-blue">AI</span></span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-1 md:gap-4">
+                    {% if session.get('user_id') %}
+                    <a href="{{ url_for('index') }}"
+                        class="nav-link text-slate-600 hover:text-medical-blue transition px-3 py-2 text-sm font-semibold rounded-lg hover:bg-blue-50/50">Dashboard</a>
+                    <a href="{{ url_for('detect') }}"
+                        class="nav-link text-slate-600 hover:text-medical-blue transition px-3 py-2 text-sm font-semibold rounded-lg hover:bg-blue-50/50">Detect
+                        Cancer</a>
+                    <a href="{{ url_for('chatbot') }}"
+                        class="nav-link text-slate-600 hover:text-medical-blue transition px-3 py-2 text-sm font-semibold rounded-lg hover:bg-blue-50/50">AI
+                        Assistant</a>
+                    <a href="{{ url_for('hospitals') }}"
+                        class="nav-link text-slate-600 hover:text-medical-blue transition px-3 py-2 text-sm font-semibold rounded-lg hover:bg-blue-50/50">Hospitals</a>
+                    <a href="{{ url_for('history') }}"
+                        class="nav-link text-slate-600 hover:text-medical-blue transition px-3 py-2 text-sm font-semibold rounded-lg hover:bg-blue-50/50">History</a>
+
+                    <div class="relative group cursor-pointer ml-2 md:ml-4">
+                        <div
+                            class="flex items-center gap-2 bg-white border border-slate-200 py-1.5 px-1.5 pr-4 rounded-full text-slate-700 font-semibold text-sm hover:border-medical-blue/30 hover:shadow-md transition-all duration-300">
+                            <div
+                                class="h-8 w-8 rounded-full bg-gradient-to-r from-medical-blue to-indigo-500 flex items-center justify-center text-white font-bold shadow-inner">
+                                {{ session.get('user_name')[0].upper() }}
+                            </div>
+                            <span>{{ session.get('user_name') }}</span>
+                            <i
+                                class="fa-solid fa-chevron-down text-xs text-slate-400 group-hover:text-medical-blue transition-colors"></i>
+                        </div>
+                        <div
+                            class="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right translate-y-2 group-hover:translate-y-0 z-50 overflow-hidden">
+                            <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+                                <p class="text-xs text-slate-500 font-medium mb-1">Signed in as</p>
+                                <p class="text-sm font-bold text-slate-800 truncate">{{ session.get('user_name') }}</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="{{ url_for('logout') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl font-semibold transition-colors">
+                                    <i class="fa-solid fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"
+                        class="text-medical-blue font-bold hover:text-medical-dark transition px-4 py-2">Login</a>
+                    <a href="{{ url_for('register') }}"
+                        class="bg-medical-blue text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-medical-blue/30 hover:shadow-medical-blue/50 hover:-translate-y-0.5 transition-all duration-300 border border-medical-blue/50">Sign
+                        Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col relative w-full overflow-x-hidden">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-medical-dark text-white pt-16 pb-8 mt-auto border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-white/10 p-2 rounded-lg">
+                            <i class="fa-solid fa-notes-medical text-2xl text-blue-400"></i>
+                        </div>
+                        <span class="font-bold text-2xl tracking-tight">Derm<span class="text-blue-400">AI</span></span>
+                    </div>
+                    <p class="text-slate-400 text-sm max-w-sm leading-relaxed mb-6">Empowering early skin cancer
+                        detection using state-of-the-art Convolutional Neural Networks and intelligent healthcare
+                        assistants.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-white">Quick Links</h4>
+                    <ul class="space-y-3">
+                        <li><a href="{{ url_for('index') }}"
+                                class="text-slate-400 hover:text-blue-400 transition-colors text-sm">Home</a></li>
+                        <li><a href="{{ url_for('detect') }}"
+                                class="text-slate-400 hover:text-blue-400 transition-colors text-sm">Start Detection</a>
+                        </li>
+                        <li><a href="{{ url_for('chatbot') }}"
+                                class="text-slate-400 hover:text-blue-400 transition-colors text-sm">AI Assistant</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4 text-white">Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-sm">Privacy
+                                Policy</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-sm">Terms of
+                                Service</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-blue-400 transition-colors text-sm">Medical
+                                Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm text-center md:text-left">&copy; 2026 DermAI Final Year Project.
+                    Designed with precision & care.</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-slate-400 text-sm font-medium">System Online</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

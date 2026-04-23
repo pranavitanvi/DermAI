@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
+
+    <div
+        class="absolute top-20 right-10 w-64 h-64 bg-teal-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50 pointer-events-none">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 relative z-10 animate-fade-in-up">
+        <div class="max-w-xl">
+            <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-4 mb-4">
+                <i
+                    class="fa-solid fa-hospital text-teal-600 bg-teal-50 p-3 rounded-2xl shadow-sm border border-teal-100"></i>
+                Oncology Centers
+            </h2>
+            <p class="text-lg text-slate-500 font-medium">Find the best certified cancer research & treatment hospitals
+                near you from our verified database.</p>
+        </div>
+
+        <form class="flex w-full md:w-auto" action="{{ url_for('hospitals') }}" method="GET">
+            <div class="relative flex items-center w-full md:w-96 group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i
+                        class="fa-solid fa-location-crosshairs text-slate-400 group-focus-within:text-teal-500 transition-colors"></i>
+                </div>
+                <input type="text" name="city" value="{{ city_filter or '' }}"
+                    placeholder="Search by City (e.g. Mumbai)"
+                    class="block w-full pl-11 pr-4 py-4 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 transition-all font-medium text-slate-800 placeholder-slate-400">
+                <button type="submit"
+                    class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-lg px-6 font-bold shadow-md hover:shadow-lg transition-all">
+                    Search
+                </button>
+            </div>
+            {% if city_filter %}
+            <a href="{{ url_for('hospitals') }}"
+                class="ml-3 mt-2 md:mt-0 text-slate-400 hover:text-red-500 flex items-center transition-colors bg-white p-4 rounded-xl shadow-sm border border-slate-200"
+                title="Clear Filters">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if hospitals %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10"
+        style="animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity: 0;">
+        {% for h in hospitals %}
+        <div
+            class="bg-white/90 backdrop-blur-md rounded-3xl p-7 shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-teal-500/20 hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative overflow-hidden group">
+            <div
+                class="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -z-10 group-hover:scale-125 transition-transform duration-500 delay-75">
+            </div>
+
+            <div class="flex-grow">
+                <div class="mb-5 flex justify-between items-start">
+                    <div
+                        class="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center text-xl shadow-sm border border-teal-100">
+                        <i class="fa-solid fa-house-medical"></i>
+                    </div>
+                    <span
+                        class="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-md font-bold border border-emerald-200">Verified</span>
+                </div>
+
+                <h3
+                    class="font-extrabold text-xl text-slate-900 mb-2 leading-tight group-hover:text-teal-700 transition-colors">
+                    {{ h.name }}</h3>
+                <p class="text-teal-600 text-xs font-bold mb-5 uppercase tracking-[0.15em]">{{ h.specialization }}</p>
+
+                <div class="space-y-3 test-slate-600 text-sm font-medium">
+                    <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <i class="fa-solid fa-map-location-dot text-teal-500 mt-0.5"></i>
+                        <span class="text-slate-700">{{ h.city }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <i class="fa-solid fa-phone text-teal-500"></i>
+                        <span class="text-slate-700">{{ h.contact }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-slate-100 flex gap-3">
+                <button
+                    class="flex-1 bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white font-bold py-3 rounded-xl transition-all shadow-sm border border-teal-100 hover:border-transparent text-sm flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-calendar-check"></i> Book
+                </button>
+                <a href="https://maps.google.com/?q={{ h.name }} {{ h.city }}" target="_blank"
+                    class="flex-1 text-center bg-white text-slate-700 hover:bg-slate-800 hover:text-white font-bold py-3 rounded-xl transition-all shadow-sm border border-slate-200 text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-location-arrow"></i> Map
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div
+        class="bg-white/80 backdrop-blur-xl rounded-3xl p-16 text-center shadow-xl shadow-slate-200/50 border border-slate-100 max-w-2xl mx-auto relative z-10 animate-fade-in-up">
+        <div
+            class="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-6 shadow-inner border border-slate-300">
+            <i class="fa-solid fa-hospital-user text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-extrabold text-slate-900 mb-3">No Hospitals Found</h3>
+        <p class="text-slate-500 font-medium max-w-md mx-auto mb-8">We couldn't find any specialized oncology centers
+            matching your search criteria. Try searching
+            for a different major city like <span class="text-teal-600 font-bold">Delhi</span> or <span
+                class="text-teal-600 font-bold">Mumbai</span>.</p>
+        <a href="{{ url_for('hospitals') }}"
+            class="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5 transition-all">
+            <i class="fa-solid fa-rotate-left"></i> View All Hospitals
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
